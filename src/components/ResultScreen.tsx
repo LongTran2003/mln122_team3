@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GameResult } from '../App';
 import { getQuoteForRank } from '../data/quotes';
-import { saveToLeaderboard } from '../utils/leaderboard';
+import { saveToLeaderboard, SaveLeaderboardStatus } from '../utils/leaderboard';
 
 interface ResultScreenProps {
   result: GameResult;
@@ -21,18 +21,35 @@ export function ResultScreen({
   onLeaderboardSaved 
 }: ResultScreenProps) {
   
+const [saveStatus, setSaveStatus] =
+  useState<'saving' | SaveLeaderboardStatus | 'error'>('saving');
+const [saveMessage, setSaveMessage] = useState('');
+
   useEffect(() => {
-  // ✅ Async save
+  let mounted = true;
+
   const saveLead = async () => {
     try {
-      const entry = await saveToLeaderboard(result, playerName);
-      onLeaderboardSaved(entry.id || `${Date.now()}`);
+      const saved = await saveToLeaderboard(result, playerName);
+      if (!mounted) return;
+
+      onLeaderboardSaved(saved.entry.id || `${saved.entry.playerName}-${saved.entry.timestamp}`);
+      setSaveStatus(saved.status);
+      setSaveMessage(saved.message);
     } catch (error) {
+      if (!mounted) return;
       console.error('Failed to save:', error);
+      setSaveStatus('error');
+      setSaveMessage('Lỗi khi lưu kết quả. Vui lòng thử lại!');
     }
   };
-  saveLead();
-}, []);
+
+  void saveLead();
+
+  return () => {
+    mounted = false;
+  };
+}, [result, playerName, onLeaderboardSaved]);
 
   // Calculate rank based on exploitation rate
   const getRank = (exploitationRate: number): string => {
@@ -77,6 +94,46 @@ export function ResultScreen({
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+
+{/* ✅ Thông báo save status */}
+        {saveStatus === 'saving' && (
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <div className="animate-spin text-2xl">⚙️</div>
+            <span className="text-blue-700 font-semibold">Đang lưu kết quả...</span>
+          </div>
+        )}
+        
+        {saveStatus === 'success' && (
+          <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <span className="text-2xl">✅</span>
+            <span className="text-green-700 font-semibold">{saveMessage || 'Đã lưu kết quả vào bảng xếp hạng!'}</span>
+          </div>
+        )}
+
+        {saveStatus === 'updated' && (
+          <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <span className="text-2xl">🎯</span>
+            <span className="text-yellow-700 font-semibold">{saveMessage || 'Cập nhật điểm mới thành công!'}</span>
+          </div>
+        )}
+
+        {saveStatus === 'ignored' && (
+          <div className="bg-gray-50 border-2 border-gray-300 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <span className="text-2xl">ℹ️</span>
+            <div>
+              <span className="text-gray-700 font-semibold">{saveMessage || 'Điểm cũ của bạn tốt hơn!'}</span>
+              <div className="text-sm text-gray-500 mt-1">Không cập nhật bảng xếp hạng.</div>
+            </div>
+          </div>
+        )}
+
+        {saveStatus === 'error' && (
+          <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 mb-6 flex items-center gap-3">
+            <span className="text-2xl">❌</span>
+            <span className="text-red-700 font-semibold">{saveMessage || 'Lỗi khi lưu kết quả. Vui lòng thử lại!'}</span>
+          </div>
+        )}
+
         {/* Result Header */}
         <div className="text-center mb-8">
           <div className="text-8xl mb-4">{result.survived ? '🏆' : '💀'}</div>
@@ -214,13 +271,11 @@ export function ResultScreen({
         {/* ✅ Action Buttons - Không còn button "Lưu vào bảng xếp hạng" nữa */}
         <div className="space-y-4">
           {/* ✅ Thông báo đã lưu tự động */}
-          <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4 text-center">
-            <div className="text-green-700 font-bold">✅ Kết quả đã được lưu vào bảng xếp hạng!</div>
-          </div>
+          
 
           <button
             onClick={onViewLeaderboard}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 rounded-xl transition-all duration-200 transform hover:scale-105"
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-black py-4 rounded-xl transition-all duration-200 transform hover:scale-105"
           >
             🏆 Xem bảng xếp hạng
           </button>

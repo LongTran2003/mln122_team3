@@ -6,7 +6,7 @@ interface SpecialEventModalProps {
   onClose: () => void;
 }
 
-export function SpecialEventModal({ event, onClose }: SpecialEventModalProps) {
+export function SpecialEventModal({ event, currentRound, onClose }: SpecialEventModalProps) {
   const formatEffect = (value: number, label: string) => {
     if (value === 0) return null;
     const sign = value > 0 ? '+' : '';

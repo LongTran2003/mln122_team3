@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
-import { getLeaderboard, clearLeaderboard, LeaderboardEntry } from '../utils/leaderboard';
+import { getLeaderboard, LeaderboardEntry } from '../utils/leaderboard';
 
 interface LeaderboardScreenProps {
   onBack: () => void;
@@ -14,7 +14,6 @@ type FilterRank = 'all' | 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
 
 export function LeaderboardScreen({ onBack, highlightEntryId }: LeaderboardScreenProps) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [showConfirmClear, setShowConfirmClear] = useState(false);
   
   // Filter and sort states
   const [sortField, setSortField] = useState<SortField>('exploitationRate');
@@ -35,12 +34,6 @@ export function LeaderboardScreen({ onBack, highlightEntryId }: LeaderboardScree
     console.error('Failed to load leaderboard:', error);
   }
 };
-
-  const handleClearLeaderboard = () => {
-    clearLeaderboard();
-    setEntries([]);
-    setShowConfirmClear(false);
-  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -316,7 +309,7 @@ export function LeaderboardScreen({ onBack, highlightEntryId }: LeaderboardScree
                 <tbody>
                   {filteredAndSortedEntries.map((entry, index) => (
                     <tr
-                      key={entry.id}
+                      key={entry.id || `${entry.playerName}-${entry.timestamp}-${index}`}
                       className={`border-b border-gray-200 hover:bg-purple-50 transition-colors ${
                         entry.id === highlightEntryId ? 'bg-yellow-100 animate-pulse' : ''
                       }`}
@@ -379,46 +372,8 @@ export function LeaderboardScreen({ onBack, highlightEntryId }: LeaderboardScree
           >
             ← Quay lại
           </button>
-          {entries.length > 0 && (
-            <button
-              onClick={() => setShowConfirmClear(true)}
-              className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-black py-4 rounded-xl transition-all duration-200 transform hover:scale-105"
-            >
-              🗑️ Xóa bảng xếp hạng
-            </button>
-          )}
-        </div>
-
-        {/* Confirm Clear Modal */}
-        {showConfirmClear && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-              <div className="text-center mb-6">
-                <div className="text-6xl mb-4">⚠️</div>
-                <h2 className="text-2xl text-gray-800 mb-2">Xác nhận xóa</h2>
-                <p className="text-gray-600">
-                  Bạn có chắc chắn muốn xóa toàn bộ bảng xếp hạng? Hành động này không thể hoàn tác.
-                </p>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowConfirmClear(false)}
-                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-black py-3 rounded-xl transition-all duration-200"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={handleClearLeaderboard}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl transition-all duration-200"
-                >
-                  Xóa
-                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </div>
   );
 }

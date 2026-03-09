@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MenuScreen } from './components/MenuScreen';
 import { GameScreen } from './components/GameScreen';
 import { ResultScreen } from './components/ResultScreen';
@@ -22,10 +22,14 @@ export default function App() {
   const [screen, setScreen] = useState<'menu' | 'game' | 'result' | 'leaderboard'>('menu');
   const [result, setResult] = useState<GameResult | null>(null);
   const [savedEntryId, setSavedEntryId] = useState<string | undefined>(undefined);
-  const [playerName, setPlayerName] = useState<string>(''); // ✅ Thêm state lưu tên
+  
+  // Load playerName từ localStorage
+  const [playerName, setPlayerName] = useState<string>(() => {
+    return localStorage.getItem('playerName') || '';
+  });
 
-  const handleStartGame = (name: string) => { // ✅ Nhận tên từ MenuScreen
-    setPlayerName(name); // ✅ Lưu tên vào state
+  const handleStartGame = (name: string) => {
+    setPlayerName(name);
     setScreen('game');
   };
 
@@ -36,15 +40,15 @@ export default function App() {
 
   const handleRestart = () => {
     setResult(null);
-    setScreen('menu'); // ✅ Về menu để nhập tên lại
+    setScreen('menu'); // Về menu nhưng GIỮ NGUYÊN tên
     setSavedEntryId(undefined);
-    setPlayerName(''); // ✅ Reset tên
+    // ❌ KHÔNG reset playerName nữa
   };
 
   const handleBackToMenu = () => {
     setResult(null);
     setScreen('menu');
-    setPlayerName(''); // ✅ Reset tên
+    // ❌ KHÔNG reset playerName nữa
   };
 
   const handleViewLeaderboard = () => {
@@ -72,7 +76,7 @@ export default function App() {
     return (
       <ResultScreen
         result={result}
-        playerName={playerName} // ✅ Truyền tên xuống ResultScreen
+        playerName={playerName}
         onRestart={handleRestart}
         onBackToMenu={handleBackToMenu}
         onViewLeaderboard={handleViewLeaderboard}
@@ -81,5 +85,5 @@ export default function App() {
     );
   }
 
-  return <GameScreen playerName={playerName} onGameEnd={handleGameEnd} />; {/* ✅ Truyền tên xuống GameScreen */}
+  return <GameScreen playerName={playerName} onGameEnd={handleGameEnd} />;
 }
