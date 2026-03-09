@@ -1,31 +1,49 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { GameResult } from '../App';
 import { getQuoteForRank } from '../data/quotes';
 import { saveToLeaderboard } from '../utils/leaderboard';
-import { PlayerNameModal } from './PlayerNameModal';
 
 interface ResultScreenProps {
   result: GameResult;
+  playerName: string; // ✅ Thêm prop playerName
   onRestart: () => void;
   onBackToMenu: () => void;
   onViewLeaderboard: () => void;
   onLeaderboardSaved: (entryId: string) => void;
 }
 
-export function ResultScreen({ result, onRestart, onBackToMenu, onViewLeaderboard, onLeaderboardSaved }: ResultScreenProps) {
-  const [showNameModal, setShowNameModal] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+export function ResultScreen({ 
+  result, 
+  playerName, // ✅ Destructure playerName
+  onRestart, 
+  onBackToMenu, 
+  onViewLeaderboard, 
+  onLeaderboardSaved 
+}: ResultScreenProps) {
+  
+  useEffect(() => {
+  // ✅ Async save
+  const saveLead = async () => {
+    try {
+      const entry = await saveToLeaderboard(result, playerName);
+      onLeaderboardSaved(entry.id || `${Date.now()}`);
+    } catch (error) {
+      console.error('Failed to save:', error);
+    }
+  };
+  saveLead();
+}, []);
 
   // Calculate rank based on exploitation rate
   const getRank = (exploitationRate: number): string => {
     if (!result.survived) return 'F';
     
-    if (exploitationRate < 0.5) return 'S'; // Very low exploitation - humane
-    if (exploitationRate < 1.0) return 'A'; // Low exploitation
-    if (exploitationRate < 1.5) return 'B'; // Moderate
-    if (exploitationRate < 2.5) return 'C'; // High
-    if (exploitationRate < 4.0) return 'D'; // Very high
-    return 'F'; // Extreme exploitation
+    if (exploitationRate < 0.5) return 'S';
+    if (exploitationRate < 1.0) return 'A';
+    if (exploitationRate < 1.5) return 'B';
+    if (exploitationRate < 2.5) return 'C';
+    if (exploitationRate < 4.0) return 'D';
+    return 'F';
   };
 
   const getRankDescription = (rank: string): string => {
@@ -56,24 +74,6 @@ export function ResultScreen({ result, onRestart, onBackToMenu, onViewLeaderboar
   const rankColor = getRankColor(rank);
   const quote = getQuoteForRank(rank);
 
-  const handleSaveToLeaderboard = () => {
-    setShowNameModal(true);
-  };
-
-  const handleNameSubmit = (name: string) => {
-    const entry = saveToLeaderboard(result, name);
-    onLeaderboardSaved(entry.id);
-    setIsSaved(true);
-    setShowNameModal(false);
-  };
-
-  const handleNameSkip = () => {
-    const entry = saveToLeaderboard(result, 'Anonymous');
-    onLeaderboardSaved(entry.id);
-    setIsSaved(true);
-    setShowNameModal(false);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
@@ -86,6 +86,10 @@ export function ResultScreen({ result, onRestart, onBackToMenu, onViewLeaderboar
           <p className="text-gray-600 text-lg">{result.reason}</p>
           <div className="mt-4 text-gray-500">
             Đã trải qua <strong className="text-red-600">{result.rounds}</strong> vòng sản xuất
+          </div>
+          {/* ✅ Hiển thị tên người chơi */}
+          <div className="mt-2 text-purple-600 font-bold">
+            Người chơi: {playerName}
           </div>
         </div>
 
@@ -169,63 +173,57 @@ export function ResultScreen({ result, onRestart, onBackToMenu, onViewLeaderboar
             <p className="text-gray-800 italic leading-relaxed mb-3">
               "{quote.text}"
             </p>
-            <div className="text-red-700">— {quote.author} — </div>
+            <div className="text-red-700">— {quote.author} —</div>
           </div>
         </div>
 
         {/* Explanation */}
         <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-8">
-  <h4 className="text-blue-700 mb-3 text-center font-bold text-lg">📚 Giải thích Thuật ngữ</h4>
-  <div className="text-gray-700 text-sm leading-relaxed space-y-3">
-    <p>
-      <strong className="text-blue-800">1. Thời gian lao động:</strong> Tổng thời gian công nhân làm việc trong một chu kỳ.
-    </p>
-    <p>
-      <strong className="text-green-700">2. Lao động tất yếu (Necessary Labor):</strong> Phần thời gian công nhân tạo ra giá trị ngang bằng với sức lao động của mình (tương đương tiền lương nhận được).
-    </p>
-    <p>
-      <strong className="text-orange-700">3. Lao động thặng dư (Surplus Labor):</strong> 
-      <br/>
-      <span className="italic">Lao động thặng dư = Tổng thời gian - Lao động tất yếu.</span>
-      <br/>
-      Trong thời gian này, công nhân vẫn làm việc nhưng không được trả công. Đây là nguồn gốc của lợi nhuận.
-    </p>
-    <p>
-      <strong className="text-red-700">4. Giá trị thặng dư (m):</strong> Giá trị được tạo ra trong thời gian lao động thặng dư.
-    </p>
-    <div className="bg-white p-3 rounded-lg border border-blue-100">
-      <strong className="text-purple-700 block mb-1">5. Tỷ suất giá trị thặng dư (m'):</strong>
-      <div>Công thức: <code className="bg-gray-100 px-2 py-1 rounded font-mono text-red-600 font-bold">m' = m / v</code></div>
-      <ul className="list-disc pl-4 mt-1 text-gray-600">
-        <li><strong>m:</strong> Giá trị thặng dư</li>
-        <li><strong>v:</strong> Tư bản khả biến (Tiền lương/Lao động tất yếu)</li>
-      </ul>
-      <p className="mt-1 italic text-xs">
-        ➔ Tỷ lệ này càng cao nghĩa là mức độ bóc lột của nhà tư bản đối với công nhân càng nặng nề.
-      </p>
-    </div>
-  </div>
-</div>
+          <h4 className="text-blue-700 mb-3 text-center font-bold text-lg">📚 Giải thích Thuật ngữ</h4>
+          <div className="text-gray-700 text-sm leading-relaxed space-y-3">
+            <p>
+              <strong className="text-blue-800">1. Thời gian lao động:</strong> Tổng thời gian công nhân làm việc trong một chu kỳ.
+            </p>
+            <p>
+              <strong className="text-green-700">2. Lao động tất yếu (Necessary Labor):</strong> Phần thời gian công nhân tạo ra giá trị ngang bằng với sức lao động của mình (tương đương tiền lương nhận được).
+            </p>
+            <p>
+              <strong className="text-orange-700">3. Lao động thặng dư (Surplus Labor):</strong>
+              <br />
+              <span className="italic">Lao động thặng dư = Tổng thời gian - Lao động tất yếu.</span>
+              <br />
+              Trong thời gian này, công nhân vẫn làm việc nhưng không được trả công. Đây là nguồn gốc của lợi nhuận.
+            </p>
+            <p>
+              <strong className="text-red-700">4. Giá trị thặng dư (m):</strong> Giá trị được tạo ra trong thời gian lao động thặng dư.
+            </p>
+            <div className="bg-white p-3 rounded-lg border border-blue-100">
+              <strong className="text-purple-700 block mb-1">5. Tỷ suất giá trị thặng dư (m'):</strong>
+              <div>Công thức: <code className="bg-gray-100 px-2 py-1 rounded font-mono text-red-600 font-bold">m' = m / v</code></div>
+              <ul className="list-disc pl-4 mt-1 text-gray-600">
+                <li><strong>m:</strong> Giá trị thặng dư</li>
+                <li><strong>v:</strong> Tư bản khả biến (Tiền lương/Lao động tất yếu)</li>
+              </ul>
+              <p className="mt-1 italic text-xs">
+                ➔ Tỷ lệ này càng cao nghĩa là mức độ bóc lột của nhà tư bản đối với công nhân càng nặng nề.
+              </p>
+            </div>
+          </div>
+        </div>
 
-        {/* Action Buttons */}
+        {/* ✅ Action Buttons - Không còn button "Lưu vào bảng xếp hạng" nữa */}
         <div className="space-y-4">
-          {!isSaved && (
-            <button
-              onClick={handleSaveToLeaderboard}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-black py-4 rounded-xl transition-all duration-200 transform hover:scale-105"
-            >
-              💾 Lưu vào bảng xếp hạng
-            </button>
-          )}
-          
-          {isSaved && (
-            <button
-              onClick={onViewLeaderboard}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-black py-4 rounded-xl transition-all duration-200 transform hover:scale-105"
-            >
-              🏆 Xem bảng xếp hạng
-            </button>
-          )}
+          {/* ✅ Thông báo đã lưu tự động */}
+          <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4 text-center">
+            <div className="text-green-700 font-bold">✅ Kết quả đã được lưu vào bảng xếp hạng!</div>
+          </div>
+
+          <button
+            onClick={onViewLeaderboard}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 rounded-xl transition-all duration-200 transform hover:scale-105"
+          >
+            🏆 Xem bảng xếp hạng
+          </button>
 
           <div className="flex gap-4">
             <button
@@ -242,10 +240,6 @@ export function ResultScreen({ result, onRestart, onBackToMenu, onViewLeaderboar
             </button>
           </div>
         </div>
-
-        {showNameModal && (
-          <PlayerNameModal onSubmit={handleNameSubmit} onSkip={handleNameSkip} />
-        )}
       </div>
     </div>
   );

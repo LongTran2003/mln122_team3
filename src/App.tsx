@@ -22,8 +22,10 @@ export default function App() {
   const [screen, setScreen] = useState<'menu' | 'game' | 'result' | 'leaderboard'>('menu');
   const [result, setResult] = useState<GameResult | null>(null);
   const [savedEntryId, setSavedEntryId] = useState<string | undefined>(undefined);
+  const [playerName, setPlayerName] = useState<string>(''); // ✅ Thêm state lưu tên
 
-  const handleStartGame = () => {
+  const handleStartGame = (name: string) => { // ✅ Nhận tên từ MenuScreen
+    setPlayerName(name); // ✅ Lưu tên vào state
     setScreen('game');
   };
 
@@ -34,13 +36,15 @@ export default function App() {
 
   const handleRestart = () => {
     setResult(null);
-    setScreen('game');
+    setScreen('menu'); // ✅ Về menu để nhập tên lại
     setSavedEntryId(undefined);
+    setPlayerName(''); // ✅ Reset tên
   };
 
   const handleBackToMenu = () => {
     setResult(null);
     setScreen('menu');
+    setPlayerName(''); // ✅ Reset tên
   };
 
   const handleViewLeaderboard = () => {
@@ -68,6 +72,7 @@ export default function App() {
     return (
       <ResultScreen
         result={result}
+        playerName={playerName} // ✅ Truyền tên xuống ResultScreen
         onRestart={handleRestart}
         onBackToMenu={handleBackToMenu}
         onViewLeaderboard={handleViewLeaderboard}
@@ -76,5 +81,5 @@ export default function App() {
     );
   }
 
-  return <GameScreen onGameEnd={handleGameEnd} />;
+  return <GameScreen playerName={playerName} onGameEnd={handleGameEnd} />; {/* ✅ Truyền tên xuống GameScreen */}
 }

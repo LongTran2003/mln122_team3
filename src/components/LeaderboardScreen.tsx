@@ -27,10 +27,14 @@ export function LeaderboardScreen({ onBack, highlightEntryId }: LeaderboardScree
     loadLeaderboard();
   }, []);
 
-  const loadLeaderboard = () => {
-    const data = getLeaderboard();
+  const loadLeaderboard = async () => {
+  try {
+    const data = await getLeaderboard();
     setEntries(data);
-  };
+  } catch (error) {
+    console.error('Failed to load leaderboard:', error);
+  }
+};
 
   const handleClearLeaderboard = () => {
     clearLeaderboard();

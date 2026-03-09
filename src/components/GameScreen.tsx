@@ -8,10 +8,11 @@ import { getRandomSpecialEvent, SpecialEvent } from '../data/special-events';
 import { GameResult } from '../App';
 
 interface GameScreenProps {
+  playerName: string; // ✅ Thêm prop playerName
   onGameEnd: (result: GameResult) => void;
 }
 
-export function GameScreen({ onGameEnd }: GameScreenProps) {
+export function GameScreen({ playerName, onGameEnd }: GameScreenProps) { // ✅ Destructure playerName
   // Core game state
   const [round, setRound] = useState(1);
   const [C, setC] = useState(50); // Capital
@@ -162,7 +163,7 @@ export function GameScreen({ onGameEnd }: GameScreenProps) {
       const isEventTriggered = Math.random() < EVENT_CHANCE && round > 1; 
 
       if (isEventTriggered) {
-        const randomEvent = getRandomSpecialEvent(); // Không cần tham số round nữa
+        const randomEvent = getRandomSpecialEvent(round); // Không cần tham số round nữa
         setSpecialEvent(randomEvent);
       } else {
         advanceRound();
@@ -200,169 +201,380 @@ export function GameScreen({ onGameEnd }: GameScreenProps) {
     setLogs(prev => [...prev, { round, message, type }]);
   };
 
+  // return (
+  //   <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 p-4 md:p-6">
+  //     {/* Đã sửa lỗi thiếu thẻ div ở đây */}
+  //     <div className="max-w-7xl mx-auto">
+  //       {/* Header */}
+  //       <div className="text-center mb-6">
+  //         <h1 className="text-red-700 mb-3 font-bold text-3xl">Mật Mã Thặng Dư</h1>
+  //         <div className="inline-block bg-white border-2 border-red-400 rounded-full px-6 py-2 shadow-lg">
+  //           <span className="text-gray-700">Vòng </span>
+  //           <span className="text-red-700 text-xl font-bold">{round}</span>
+  //           <span className="text-gray-700"> / 30</span>
+  //         </div>
+  //       </div>
+
+  //       {/* Main Layout - Đã sửa lỗi thiếu thẻ div ở đây */}
+  //       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+  //         {/* Left: Indicators */}
+  //         <div className="lg:col-span-3 space-y-4">
+  //           <IndicatorBar
+  //             label="Tư bản sản xuất (C)"
+  //             value={C}
+  //             maxValue={100}
+  //             icon="🏦"
+  //             color="blue"
+  //             warning={C < 15}
+  //           /> 
+            
+  //           <IndicatorBar
+  //             label="Sức lao động (L)"
+  //             value={L}
+  //             maxValue={100}
+  //             icon="👷"
+  //             color="green"
+  //             warning={L < 15}
+  //           />
+            
+  //           <IndicatorBar
+  //             label="Tái sản xuất (R)"
+  //             value={R}
+  //             maxValue={100}
+  //             icon="🏥"
+  //             color="orange"
+  //             warning={R < 15}
+  //           />
+
+  //           {/* Contradiction Indicator */}
+  //           <div className="bg-purple-50 border-2 border-purple-300 rounded-2xl p-4">
+  //             <div className="text-purple-700 mb-2 font-bold">Mâu thuẫn |C-L|</div>
+  //             <div className={`text-3xl font-bold ${Math.abs(C - L) > 30 ? 'text-red-600' : 'text-purple-700'}`}>
+  //               {Math.abs(C - L).toFixed(0)}
+  //             </div>
+  //             <div className="text-xs text-gray-500 mt-1">Giới hạn: 40</div>
+  //             {Math.abs(C - L) > 30 && (
+  //               <div className="text-red-600 text-sm mt-2 animate-pulse font-bold">
+  //                 ⚠️ Nguy hiểm!
+  //               </div>
+  //             )}
+  //           </div>
+
+  //           {/* Low R Counter */}
+  //           {lowRCount > 0 && (
+  //             <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-4 animate-pulse">
+  //               <div className="text-red-700 mb-2 font-bold">Cảnh báo R thấp</div>
+  //               <div className="text-2xl text-red-600 font-bold">{lowRCount}/3 vòng</div>
+  //               <div className="text-xs text-gray-600 mt-1">R {'<'} 15 liên tiếp</div>
+  //             </div>
+  //           )}
+  //         </div>
+
+  //         {/* Center: Policy Cards & Theory Box */}
+  //         <div className="lg:col-span-6">
+  //           <div className="bg-white/60 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-6 mb-6">
+  //             <h2 className="text-gray-700 mb-6 text-center text-lg font-bold">
+  //               Chọn chính sách sản xuất:
+  //             </h2>
+  //             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  //               {currentPolicies.map((policy) => (
+  //                 <PolicyCard
+  //                   key={policy.id}
+  //                   policy={policy}
+  //                   onSelect={() => handlePolicySelect(policy)}
+  //                   disabled={isProcessing}
+  //                 />
+  //               ))}
+  //             </div>
+              
+  //             {isProcessing && (
+  //               <div className="mt-6 text-center">
+  //                 <div className="inline-block animate-spin text-5xl">⚙️</div>
+  //                 <div className="text-gray-600 mt-2">Đang xử lý...</div>
+  //               </div>
+  //             )}
+  //           </div>
+
+  //           {/* Theory Box - Đã bố trí lại đẹp mắt */}
+  //           <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-2xl p-6 shadow-sm">
+  //             <h3 className="text-red-800 font-bold text-lg mb-4 flex items-center gap-2 border-b border-red-200 pb-2">
+  //               <span className="text-2xl">📖</span>
+  //               Lý thuyết Marx
+  //             </h3>
+              
+  //             {/* Phần 1: Định nghĩa m */}
+  //             <div className="mb-4">
+  //               <p className="text-gray-700 text-sm leading-relaxed">
+  //                 <strong className="text-red-700 font-bold text-base">1. Giá trị thặng dư (m):</strong>
+  //                 <br />
+  //                 Là phần giá trị do công nhân tạo ra nhưng không được trả công. Đây là phần lao động vượt quá <span className="italic text-gray-600">lao động tất yếu</span> (phần giá trị để tái sản xuất sức lao động - hay tiền lương).
+  //               </p>
+  //             </div>
+
+              
+
+  //             {/* Phần 2: Công thức m' */}
+  //             <div className="bg-white/60 rounded-xl p-4 border border-red-100">
+  //               <p className="text-gray-700 text-sm mb-2">
+  //                 <strong className="text-red-700 font-bold text-base">2. Tỷ suất giá trị thặng dư (m'):</strong>
+  //                 <span className="block text-xs text-gray-500 mt-1">Chỉ số cốt lõi đo lường mức độ bóc lột.</span>
+  //               </p>
+
+  //               {/* Công thức nổi bật */}
+  //               <div className="bg-red-100 text-red-800 font-bold text-center py-2 rounded-lg my-3 font-mono text-lg border border-red-200">
+  //                 m' = m / v
+  //               </div>
+
+  //               {/* Giải thích biến */}
+  //               <ul className="text-sm text-gray-700 space-y-1 mb-3 pl-2">
+  //                 <li>• <strong>m:</strong> Giá trị thặng dư</li>
+  //                 <li>• <strong>v:</strong> Tư bản khả biến (tiền lương trả cho công nhân)</li>
+  //               </ul>
+
+  //               {/* Ý nghĩa */}
+  //               <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 text-sm">
+  //                 <strong className="text-orange-800 block mb-1">Ý nghĩa:</strong>
+  //                 <ul className="space-y-1 text-gray-700">
+  //                   <li className="flex items-start gap-2">
+  //                     <span className="text-red-500">📈</span> 
+  //                     <span><strong>m' càng cao:</strong> Mức bóc lột càng lớn (Tư bản chiếm nhiều hơn trả lương).</span>
+  //                   </li>
+  //                   <li className="flex items-start gap-2">
+  //                     <span className="text-green-600">📉</span> 
+  //                     <span><strong>m' thấp:</strong> Sự phân chia giá trị công bằng hơn.</span>
+  //                   </li>
+  //                 </ul>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         {/* Right: Event Log */}
+  //         <div className="lg:col-span-3">
+  //           <GameLog logs={logs} currentRound={round} />
+  //         </div>
+  //       </div>
+  //     </div>
+
+  //     {/* Special Event Modal */}
+  //     {specialEvent && (
+  //       <SpecialEventModal
+  //         event={specialEvent}
+  //         currentRound={round} // Thêm prop này để khớp với file Modal
+  //         onClose={handleEventClose}
+  //       />
+  //     )}
+  //   </div>
+  // );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 p-4 md:p-6">
-      {/* Đã sửa lỗi thiếu thẻ div ở đây */}
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-red-700 mb-3 font-bold text-3xl">Mật Mã Thặng Dư</h1>
-          <div className="inline-block bg-white border-2 border-red-400 rounded-full px-6 py-2 shadow-lg">
-            <span className="text-gray-700">Vòng </span>
-            <span className="text-red-700 text-xl font-bold">{round}</span>
-            <span className="text-gray-700"> / 30</span>
-          </div>
-        </div>
+  <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 p-4 md:p-6">
+    <div className="max-w-7xl mx-auto">
+      
+      {/* Main Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Left: Indicators + Header + Roadmap */}
+        <div className="lg:col-span-3 space-y-4">
+          {/* Indicators */}
+          <IndicatorBar
+            label="Tư bản sản xuất (C)"
+            value={C}
+            maxValue={100}
+            icon="🏦"
+            color="blue"
+            warning={C < 15}
+          /> 
+          
+          <IndicatorBar
+            label="Sức lao động (L)"
+            value={L}
+            maxValue={100}
+            icon="👷"
+            color="green"
+            warning={L < 15}
+          />
+          
+          <IndicatorBar
+            label="Tái sản xuất (R)"
+            value={R}
+            maxValue={100}
+            icon="🏥"
+            color="orange"
+            warning={R < 15}
+          />
 
-        {/* Main Layout - Đã sửa lỗi thiếu thẻ div ở đây */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left: Indicators */}
-          <div className="lg:col-span-3 space-y-4">
-            <IndicatorBar
-              label="Tư bản sản xuất (C)"
-              value={C}
-              maxValue={100}
-              icon="🏦"
-              color="blue"
-              warning={C < 15}
-            /> 
-            
-            <IndicatorBar
-              label="Sức lao động (L)"
-              value={L}
-              maxValue={100}
-              icon="👷"
-              color="green"
-              warning={L < 15}
-            />
-            
-            <IndicatorBar
-              label="Tái sản xuất (R)"
-              value={R}
-              maxValue={100}
-              icon="🏥"
-              color="orange"
-              warning={R < 15}
-            />
-
-            {/* Contradiction Indicator */}
-            <div className="bg-purple-50 border-2 border-purple-300 rounded-2xl p-4">
-              <div className="text-purple-700 mb-2 font-bold">Mâu thuẫn |C-L|</div>
-              <div className={`text-3xl font-bold ${Math.abs(C - L) > 30 ? 'text-red-600' : 'text-purple-700'}`}>
-                {Math.abs(C - L).toFixed(0)}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">Giới hạn: 40</div>
-              {Math.abs(C - L) > 30 && (
-                <div className="text-red-600 text-sm mt-2 animate-pulse font-bold">
-                  ⚠️ Nguy hiểm!
-                </div>
-              )}
+          {/* Contradiction Indicator */}
+          <div className="bg-purple-50 border-2 border-purple-300 rounded-2xl p-4">
+            <div className="text-purple-700 mb-2 font-bold">Mâu thuẫn |C-L|</div>
+            <div className={`text-3xl font-bold ${Math.abs(C - L) > 30 ? 'text-red-600' : 'text-purple-700'}`}>
+              {Math.abs(C - L).toFixed(0)}
             </div>
-
-            {/* Low R Counter */}
-            {lowRCount > 0 && (
-              <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-4 animate-pulse">
-                <div className="text-red-700 mb-2 font-bold">Cảnh báo R thấp</div>
-                <div className="text-2xl text-red-600 font-bold">{lowRCount}/3 vòng</div>
-                <div className="text-xs text-gray-600 mt-1">R {'<'} 15 liên tiếp</div>
+            <div className="text-xs text-gray-500 mt-1">Giới hạn: 40</div>
+            {Math.abs(C - L) > 30 && (
+              <div className="text-red-600 text-sm mt-2 animate-pulse font-bold">
+                ⚠️ Nguy hiểm!
               </div>
             )}
           </div>
 
-          {/* Center: Policy Cards & Theory Box */}
-          <div className="lg:col-span-6">
-            <div className="bg-white/60 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-6 mb-6">
-              <h2 className="text-gray-700 mb-6 text-center text-lg font-bold">
-                Chọn chính sách sản xuất:
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {currentPolicies.map((policy) => (
-                  <PolicyCard
-                    key={policy.id}
-                    policy={policy}
-                    onSelect={() => handlePolicySelect(policy)}
-                    disabled={isProcessing}
-                  />
-                ))}
-              </div>
-              
-              {isProcessing && (
-                <div className="mt-6 text-center">
-                  <div className="inline-block animate-spin text-5xl">⚙️</div>
-                  <div className="text-gray-600 mt-2">Đang xử lý...</div>
-                </div>
-              )}
+          {/* ✅ HEADER - Di chuyển xuống đây */}
+          <div className="bg-white border-2 border-red-400 rounded-2xl p-4 shadow-lg">
+            <h1 className="text-red-700 font-bold text-xl text-center mb-2">Mật Mã Thặng Dư</h1>
+            <div className="text-center">
+              <span className="text-gray-700">Vòng </span>
+              <span className="text-red-700 text-2xl font-bold">{round}</span>
+              <span className="text-gray-700"> / 30</span>
             </div>
+            <div className="text-center text-sm text-gray-600 mt-2">
+              Người chơi: <span className="font-bold text-purple-600">{playerName}</span>
+            </div>
+          </div>
 
-            {/* Theory Box - Đã bố trí lại đẹp mắt */}
-            <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-red-800 font-bold text-lg mb-4 flex items-center gap-2 border-b border-red-200 pb-2">
-                <span className="text-2xl">📖</span>
-                Lý thuyết Marx
-              </h3>
-              
-              {/* Phần 1: Định nghĩa m */}
-              <div className="mb-4">
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  <strong className="text-red-700 font-bold text-base">1. Giá trị thặng dư (m):</strong>
-                  <br />
-                  Là phần giá trị do công nhân tạo ra nhưng không được trả công. Đây là phần lao động vượt quá <span className="italic text-gray-600">lao động tất yếu</span> (phần giá trị để tái sản xuất sức lao động - hay tiền lương).
-                </p>
+          {/* ✅ ROADMAP - Slay the Spire style */}
+          <div className="bg-white border-2 border-gray-300 rounded-2xl p-4">
+            <h3 className="text-gray-700 font-bold text-center mb-3">🗺️ Lộ trình</h3>
+            <div className="space-y-2">
+              {/* Hiển thị roadmap cho 30 vòng */}
+              {[...Array(6)].map((_, groupIndex) => {
+                const startRound = groupIndex * 5 + 1;
+                const endRound = Math.min(startRound + 4, 30);
+                const isCurrentGroup = round >= startRound && round <= endRound;
+                const isPassed = round > endRound;
+                
+                return (
+                  <div key={groupIndex} className="flex items-center gap-2">
+                    <div className={`flex-1 h-2 rounded-full ${
+                      isPassed ? 'bg-green-500' : 
+                      isCurrentGroup ? 'bg-yellow-400 animate-pulse' : 
+                      'bg-gray-200'
+                    }`} />
+                    <div className={`text-xs font-bold ${
+                      isPassed ? 'text-green-600' : 
+                      isCurrentGroup ? 'text-yellow-600' : 
+                      'text-gray-400'
+                    }`}>
+                      {startRound}-{endRound}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Milestone indicators */}
+            <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600 space-y-1">
+              <div className={`flex items-center gap-2 ${round >= 10 ? 'text-green-600 font-bold' : ''}`}>
+                <span>{round >= 10 ? '✓' : '○'}</span>
+                <span>Vòng 10: Khủng hoảng đầu tiên</span>
               </div>
-
-              
-
-              {/* Phần 2: Công thức m' */}
-              <div className="bg-white/60 rounded-xl p-4 border border-red-100">
-                <p className="text-gray-700 text-sm mb-2">
-                  <strong className="text-red-700 font-bold text-base">2. Tỷ suất giá trị thặng dư (m'):</strong>
-                  <span className="block text-xs text-gray-500 mt-1">Chỉ số cốt lõi đo lường mức độ bóc lột.</span>
-                </p>
-
-                {/* Công thức nổi bật */}
-                <div className="bg-red-100 text-red-800 font-bold text-center py-2 rounded-lg my-3 font-mono text-lg border border-red-200">
-                  m' = m / v
-                </div>
-
-                {/* Giải thích biến */}
-                <ul className="text-sm text-gray-700 space-y-1 mb-3 pl-2">
-                  <li>• <strong>m:</strong> Giá trị thặng dư</li>
-                  <li>• <strong>v:</strong> Tư bản khả biến (tiền lương trả cho công nhân)</li>
-                </ul>
-
-                {/* Ý nghĩa */}
-                <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 text-sm">
-                  <strong className="text-orange-800 block mb-1">Ý nghĩa:</strong>
-                  <ul className="space-y-1 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500">📈</span> 
-                      <span><strong>m' càng cao:</strong> Mức bóc lột càng lớn (Tư bản chiếm nhiều hơn trả lương).</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600">📉</span> 
-                      <span><strong>m' thấp:</strong> Sự phân chia giá trị công bằng hơn.</span>
-                    </li>
-                  </ul>
-                </div>
+              <div className={`flex items-center gap-2 ${round >= 20 ? 'text-green-600 font-bold' : ''}`}>
+                <span>{round >= 20 ? '✓' : '○'}</span>
+                <span>Vòng 20: Giữa hành trình</span>
+              </div>
+              <div className={`flex items-center gap-2 ${round >= 30 ? 'text-green-600 font-bold' : ''}`}>
+                <span>{round >= 30 ? '✓' : '○'}</span>
+                <span>Vòng 30: Chiến thắng!</span>
               </div>
             </div>
           </div>
 
-          {/* Right: Event Log */}
-          <div className="lg:col-span-3">
-            <GameLog logs={logs} currentRound={round} />
+          {/* Low R Counter */}
+          {lowRCount > 0 && (
+            <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-4 animate-pulse">
+              <div className="text-red-700 mb-2 font-bold">Cảnh báo R thấp</div>
+              <div className="text-2xl text-red-600 font-bold">{lowRCount}/3 vòng</div>
+              <div className="text-xs text-gray-600 mt-1">R {'<'} 15 liên tiếp</div>
+            </div>
+          )}
+        </div>
+
+        {/* Center: Policy Cards & Theory Box */}
+        <div className="lg:col-span-6">
+          <div className="bg-white/60 backdrop-blur-sm border-2 border-gray-200 rounded-2xl p-6 mb-6">
+            <h2 className="text-gray-700 mb-6 text-center text-lg font-bold">
+              Chọn chính sách sản xuất:
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {currentPolicies.map((policy) => (
+                <PolicyCard
+                  key={policy.id}
+                  policy={policy}
+                  onSelect={() => handlePolicySelect(policy)}
+                  disabled={isProcessing}
+                />
+              ))}
+            </div>
+            
+            {isProcessing && (
+              <div className="mt-6 text-center">
+                <div className="inline-block animate-spin text-5xl">⚙️</div>
+                <div className="text-gray-600 mt-2">Đang xử lý...</div>
+              </div>
+            )}
+          </div>
+
+          {/* Theory Box - Giữ nguyên như cũ */}
+          <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-200 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-red-800 font-bold text-lg mb-4 flex items-center gap-2 border-b border-red-200 pb-2">
+              <span className="text-2xl">📖</span>
+              Lý thuyết Marx
+            </h3>
+            
+            <div className="mb-4">
+              <p className="text-gray-700 text-sm leading-relaxed">
+                <strong className="text-red-700 font-bold text-base">1. Giá trị thặng dư (m):</strong>
+                <br />
+                Là phần giá trị do công nhân tạo ra nhưng không được trả công. Đây là phần lao động vượt quá <span className="italic text-gray-600">lao động tất yếu</span> (phần giá trị để tái sản xuất sức lao động - hay tiền lương).
+              </p>
+            </div>
+
+            <div className="bg-white/60 rounded-xl p-4 border border-red-100">
+              <p className="text-gray-700 text-sm mb-2">
+                <strong className="text-red-700 font-bold text-base">2. Tỷ suất giá trị thặng dư (m'):</strong>
+                <span className="block text-xs text-gray-500 mt-1">Chỉ số cốt lõi đo lường mức độ bóc lột.</span>
+              </p>
+
+              <div className="bg-red-100 text-red-800 font-bold text-center py-2 rounded-lg my-3 font-mono text-lg border border-red-200">
+                m' = m / v
+              </div>
+
+              <ul className="text-sm text-gray-700 space-y-1 mb-3 pl-2">
+                <li>• <strong>m:</strong> Giá trị thặng dư</li>
+                <li>• <strong>v:</strong> Tư bản khả biến (tiền lương trả cho công nhân)</li>
+              </ul>
+
+              <div className="bg-orange-50 p-3 rounded-lg border border-orange-100 text-sm">
+                <strong className="text-orange-800 block mb-1">Ý nghĩa:</strong>
+                <ul className="space-y-1 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500">📈</span> 
+                    <span><strong>m' càng cao:</strong> Mức bóc lột càng lớn (Tư bản chiếm nhiều hơn trả lương).</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600">📉</span> 
+                    <span><strong>m' thấp:</strong> Sự phân chia giá trị công bằng hơn.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Special Event Modal */}
-      {specialEvent && (
-        <SpecialEventModal
-          event={specialEvent}
-          currentRound={round} // Thêm prop này để khớp với file Modal
-          onClose={handleEventClose}
-        />
-      )}
+        {/* Right: Event Log */}
+        <div className="lg:col-span-3">
+          <GameLog logs={logs} currentRound={round} />
+        </div>
+      </div>
     </div>
-  );
+
+    {/* Special Event Modal */}
+    {specialEvent && (
+      <SpecialEventModal
+        event={specialEvent}
+        currentRound={round}
+        onClose={handleEventClose}
+      />
+    )}
+  </div>
+);
 }

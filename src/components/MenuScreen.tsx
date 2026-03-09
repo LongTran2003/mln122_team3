@@ -1,10 +1,30 @@
+import { useState } from 'react';
+import { PlayerNameModal } from './PlayerNameModal';
+
 interface MenuScreenProps {
-  onStart: () => void;
+  onStart: (playerName: string) => void;
   onViewLeaderboard: () => void;
 }
 
 export function MenuScreen({ onStart, onViewLeaderboard }: MenuScreenProps) {
+  const [showNameModal, setShowNameModal] = useState(false); // ✅ State cho modal
+
+  const handleStartClick = () => {
+    setShowNameModal(true); // ✅ Hiện modal thay vì start luôn
+  };
+
+  const handleNameSubmit = (name: string) => {
+    setShowNameModal(false);
+    onStart(name); // ✅ Gọi onStart với tên
+  };
+
+  const handleSkipName = () => {
+    setShowNameModal(false);
+    onStart('Anonymous'); // ✅ Nếu bỏ qua thì dùng Anonymous
+  };
+
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
         <div className="text-center mb-8">
@@ -95,7 +115,7 @@ export function MenuScreen({ onStart, onViewLeaderboard }: MenuScreenProps) {
 
         <div className="space-y-4">
           <button
-            onClick={onStart}
+            onClick={handleStartClick}
             className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-5 rounded-xl text-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
           >
             ⚒️ Bắt đầu cuộc cách mạng
@@ -114,5 +134,14 @@ export function MenuScreen({ onStart, onViewLeaderboard }: MenuScreenProps) {
         </div>
       </div>
     </div>
+
+    {/* ✅ Modal nhập tên */}
+      {showNameModal && (
+        <PlayerNameModal
+          onSubmit={handleNameSubmit}
+          onSkip={handleSkipName}
+        />
+      )}
+    </>
   );
 }

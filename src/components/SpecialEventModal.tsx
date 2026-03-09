@@ -2,6 +2,7 @@ import { SpecialEvent } from '../data/special-events';
 
 interface SpecialEventModalProps {
   event: SpecialEvent;
+  currentRound: number;
   onClose: () => void;
 }
 
@@ -23,7 +24,7 @@ export function SpecialEventModal({ event, onClose }: SpecialEventModalProps) {
         <div className="text-center mb-6">
           <div className="text-7xl mb-4 animate-bounce">{event.icon}</div>
           <div className="inline-block bg-red-600 text-white px-4 py-1 rounded-full text-sm mb-3">
-            Vòng {event.round} - Sự kiện đặc biệt
+            Vòng {currentRound} - Sự kiện đặc biệt
           </div>
           <h2 className="text-red-700 mb-3">{event.title}</h2>
           <p className="text-gray-700 leading-relaxed">{event.description}</p>
