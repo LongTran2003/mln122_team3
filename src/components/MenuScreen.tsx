@@ -107,7 +107,7 @@ const isDuplicateOfOtherPlayer = (value: string) => {
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
         <div className="text-center mb-8">
           <div className="text-7xl mb-4">⚒️</div>
-          <h1 className="text-red-700 mb-3">Project T'</h1>
+          <h1 className="text-red-700 mb-3">Vốn - Trong Chiến Lược</h1>
           <h2 className="text-gray-700 mb-2">Mật Mã Thặng Dư</h2>
           <p className="text-gray-500">Bạn có thể cân bằng mâu thuẫn giữa Tư bản và Lao động?</p>
           <p className="text-gray-500 italic mt-4">
