@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { GameResult } from '../App';
 import { getQuoteForRank } from '../data/quotes';
 import { saveToLeaderboard, SaveLeaderboardStatus } from '../utils/leaderboard';
+import { determineIdeology } from '../data/ideologies';
 
 interface ResultScreenProps {
   result: GameResult;
@@ -24,6 +25,7 @@ export function ResultScreen({
 const [saveStatus, setSaveStatus] =
   useState<'saving' | SaveLeaderboardStatus | 'error'>('saving');
 const [saveMessage, setSaveMessage] = useState('');
+const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0); // 🆕 Track carousel
 
   useEffect(() => {
   let mounted = true;
@@ -90,6 +92,26 @@ const [saveMessage, setSaveMessage] = useState('');
   const rank = getRank(result.exploitationRate);
   const rankColor = getRankColor(rank);
   const quote = getQuoteForRank(rank);
+
+  // 🆕 Determine ideology based on final stats
+  const ideology = result.survived ? determineIdeology(result.finalC, result.finalL, result.finalR) : null;
+
+  // 🆕 Carousel navigation
+  const nextMilestone = () => {
+    if (ideology) {
+      setCurrentMilestoneIndex((prev) =>
+        prev === ideology.milestones.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const prevMilestone = () => {
+    if (ideology) {
+      setCurrentMilestoneIndex((prev) =>
+        prev === 0 ? ideology.milestones.length - 1 : prev - 1
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
@@ -158,6 +180,81 @@ const [saveMessage, setSaveMessage] = useState('');
             <div className={`text-xl ${rankColor} mb-3`}>{getRankDescription(rank)}</div>
             <div className="text-gray-600">
               Tỷ lệ bóc lột: <strong className={rankColor}>{result.exploitationRate.toFixed(3)}</strong>
+            </div>
+          </div>
+        )}
+
+        {/* 🆕 IDEOLOGY ANALYSIS CAROUSEL */}
+        {result.survived && ideology && (
+          <div className="mb-8">
+            <h2 className="text-gray-800 text-2xl font-bold mb-4 text-center">
+              🎯 Hệ thống kinh tế bạn đang hướng tới
+            </h2>
+
+            <div className={`bg-gradient-to-br ${ideology.color} rounded-2xl p-8 shadow-lg`}>
+              {/* Ideology Header */}
+              <div className="text-center mb-6">
+                <div className="text-7xl mb-3">{ideology.icon}</div>
+                <h3 className="text-white text-3xl font-black mb-2">{ideology.name}</h3>
+                <p className="text-white/90 text-lg leading-relaxed max-w-2xl mx-auto">
+                  {ideology.description}
+                </p>
+              </div>
+
+              {/* Milestones Carousel */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-4">
+                <div className="flex items-center justify-between gap-4">
+                  {/* Previous Button */}
+                  <button
+                    onClick={prevMilestone}
+                    className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all"
+                    aria-label="Previous"
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Milestone Content */}
+                  <div className="flex-1 text-center min-h-[120px] flex items-center justify-center">
+                    <div className="text-white text-lg leading-relaxed px-4 animate-fade-in">
+                      {ideology.milestones[currentMilestoneIndex]}
+                    </div>
+                  </div>
+
+                  {/* Next Button */}
+                  <button
+                    onClick={nextMilestone}
+                    className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all"
+                    aria-label="Next"
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Dots Indicator */}
+                <div className="flex justify-center gap-2 mt-4">
+                  {ideology.milestones.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentMilestoneIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${index === currentMilestoneIndex
+                          ? 'bg-white w-8'
+                          : 'bg-white/40 hover:bg-white/60'
+                        }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Historical Example */}
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
+                <div className="text-white/80 text-sm font-semibold mb-1">📜 Ví dụ lịch sử:</div>
+                <div className="text-white text-base">{ideology.historicalExample}</div>
+              </div>
             </div>
           </div>
         )}

@@ -13,6 +13,36 @@ export interface SpecialEvent {
 // All available special events (no longer tied to specific rounds)
 export const ALL_SPECIAL_EVENTS: SpecialEvent[] = [
   {
+    title: 'Ô nhiễm môi trường nghiêm trọng',
+    description: 'Ô nhiễm nhà máy gây bệnh cho công nhân, sức khỏe suy giảm',
+    icon: '☢️',
+    effects: { C: -5, L: -8, R: -15 }
+  },
+  {
+    title: 'Dịch bệnh lây lan nơi làm việc',
+    description: 'Điều kiện vệ sinh kém dẫn đến dịch bệnh bùng phát',
+    icon: '🦠',
+    effects: { C: -8, L: -10, R: -18 }
+  },
+  {
+    title: 'Tai nạn lao động nghiêm trọng',
+    description: 'Thiếu an toàn lao động gây tai nạn, công nhân bị thương',
+    icon: '🚑',
+    effects: { C: -10, L: -12, R: -20 }
+  },
+  {
+    title: 'Lạm phát giá sinh hoạt',
+    description: 'Giá cả tăng vọt, lương không đủ sống, công nhân kiệt quệ',
+    icon: '💸',
+    effects: { C: 5, L: -15, R: -22 }
+  },
+  {
+    title: 'Cắt giảm phúc lợi xã hội',
+    description: 'Chính phủ cắt trợ cấp, bảo hiểm, công nhân tự lo',
+    icon: '❌',
+    effects: { C: 8, L: -8, R: -16 }
+  },
+  {
     title: 'Đình công tự phát',
     description: 'Công nhân đình công phản đối điều kiện làm việc tồi tệ',
     icon: '✊',
@@ -112,7 +142,7 @@ export function getRandomSpecialEvent(currentRound: number): SpecialEvent | null
   const roundsSinceLastEvent = currentRound - lastEventRound;
   const probability = Math.min(
     0.65, // Cap at 65% max probability (increased for more challenge)
-    EVENT_CONFIG.BASE_PROBABILITY + 
+    EVENT_CONFIG.BASE_PROBABILITY +
     (roundsSinceLastEvent - EVENT_CONFIG.MIN_ROUND_GAP) * EVENT_CONFIG.PROBABILITY_INCREASE_PER_ROUND
   );
 
