@@ -446,6 +446,126 @@ export const ALL_POLICIES: Policy[] = [
   }
 ];
 
+// ==================== BOSS 30 - FINAL ADJUSTMENT POLICIES ====================
+/**
+ * Boss 30 Final Policies - Simple single-stat boost (+15) để điều chỉnh cuối cùng
+ */
+export const FINAL_ADJUSTMENT_POLICIES: Policy[] = [
+  // C-focused
+  {
+    id: 'final_capital_boost',
+    name: 'Đầu tư Khẩn cấp Tư bản',
+    description: 'Bơm vốn lớn vào hệ thống sản xuất để cân bằng cuối cùng',
+    icon: '💰',
+    effects: { C: 15, L: 0, R: 0 },
+    category: 'investment',
+    tier: 'epic',
+    historicalContext: 'Quyết định cuối cùng: Tập trung vào tích lũy tư bản'
+  },
+  {
+    id: 'final_capital_moderate',
+    name: 'Điều chỉnh Tư bản Vừa phải',
+    description: 'Bổ sung tư bản để đạt cân bằng hệ thống',
+    icon: '🏦',
+    effects: { C: 15, L: 0, R: 0 },
+    category: 'balanced',
+    tier: 'rare',
+    historicalContext: 'Cân bằng tư bản trong giai đoạn cuối'
+  },
+  {
+    id: 'final_capital_critical',
+    name: 'Cứu nguy Tư bản',
+    description: 'Huy động nguồn lực cuối cùng để tránh sụp đổ tư bản',
+    icon: '🆘',
+    effects: { C: 15, L: 0, R: 0 },
+    category: 'investment',
+    tier: 'epic',
+    historicalContext: 'Biện pháp khẩn cấp cứu vãn kinh tế'
+  },
+
+  // L-focused
+  {
+    id: 'final_labor_recovery',
+    name: 'Phục hồi Lực lượng Lao động',
+    description: 'Tuyển dụng và huấn luyện công nhân mới để khôi phục lực lượng lao động',
+    icon: '👷',
+    effects: { C: 0, L: 15, R: 0 },
+    category: 'welfare',
+    tier: 'epic',
+    historicalContext: 'Đầu tư vào con người trong giai đoạn then chốt'
+  },
+  {
+    id: 'final_labor_mobilize',
+    name: 'Tổng động viên Lao động',
+    description: 'Huy động toàn bộ nguồn nhân lực có thể',
+    icon: '✊',
+    effects: { C: 0, L: 15, R: 0 },
+    category: 'balanced',
+    tier: 'rare',
+    historicalContext: 'Động viên lực lượng lao động tối đa'
+  },
+  {
+    id: 'final_labor_import',
+    name: 'Nhập khẩu Lao động',
+    description: 'Mở cửa biên giới, thu hút lao động từ nước ngoài',
+    icon: '🌍',
+    effects: { C: 0, L: 15, R: 0 },
+    category: 'investment',
+    tier: 'epic',
+    historicalContext: 'Giải pháp khan hiếm lao động thời kỳ cuối'
+  },
+
+  // R-focused
+  {
+    id: 'final_reproduction_boost',
+    name: 'Đầu tư Phúc lợi Toàn diện',
+    description: 'Xây dựng hệ thống y tế, giáo dục, nhà ở miễn phí cho công nhân',
+    icon: '🏥',
+    effects: { C: 0, L: 0, R: 15 },
+    category: 'welfare',
+    tier: 'epic',
+    historicalContext: 'Đầu tư vào tái sản xuất sức lao động dài hạn'
+  },
+  {
+    id: 'final_reproduction_urgent',
+    name: 'Cấp cứu Tái sản xuất',
+    description: 'Trợ cấp khẩn cấp cho công nhân để đảm bảo đời sống tối thiểu',
+    icon: '🆘',
+    effects: { C: 0, L: 0, R: 15 },
+    category: 'welfare',
+    tier: 'rare',
+    historicalContext: 'Biện pháp khẩn cấp cứu công nhân khỏi khủng hoảng'
+  },
+  {
+    id: 'final_reproduction_sustain',
+    name: 'Duy trì Sức khỏe Công nhân',
+    description: 'Chương trình chăm sóc sức khỏe tổng thể cho giai cấp công nhân',
+    icon: '💚',
+    effects: { C: 0, L: 0, R: 15 },
+    category: 'balanced',
+    tier: 'epic',
+    historicalContext: 'Đầu tư dài hạn vào chất lượng sức lao động'
+  }
+];
+
+/**
+ * Get 3 random Final Adjustment policies for Boss 30
+ * Ensures at least one policy for each stat (C, L, R)
+ */
+export function getFinalPolicies(): Policy[] {
+  const cPolicies = FINAL_ADJUSTMENT_POLICIES.filter(p => p.effects.C > 0);
+  const lPolicies = FINAL_ADJUSTMENT_POLICIES.filter(p => p.effects.L > 0);
+  const rPolicies = FINAL_ADJUSTMENT_POLICIES.filter(p => p.effects.R > 0);
+
+  // Pick 1 from each category randomly
+  const selectedC = cPolicies[Math.floor(Math.random() * cPolicies.length)];
+  const selectedL = lPolicies[Math.floor(Math.random() * lPolicies.length)];
+  const selectedR = rPolicies[Math.floor(Math.random() * rPolicies.length)];
+
+  return [selectedC, selectedL, selectedR].sort(() => Math.random() - 0.5);
+}
+
+
 /**
  * Get random policies based on tier rarity
  * Common: 60%, Rare: 30%, Epic: 10%
@@ -534,7 +654,7 @@ export function getMixedPolicies(
  * Get crisis-specific policies (for Boss Round 10)
  */
 export function getCrisisPolicies(count: number = 2): Policy[] {
-  const crisisPolicies = ALL_POLICIES.filter(p => 
+  const crisisPolicies = ALL_POLICIES.filter(p =>
     p.id.startsWith('crisis_')
   );
   const shuffled = [...crisisPolicies].sort(() => Math.random() - 0.5);

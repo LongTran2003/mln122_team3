@@ -52,7 +52,7 @@ export const BOSS_ROUNDS: BossRound[] = [
       allowedCategories: ['welfare', 'balanced'],
       autoEffects: { C: 0, L: 0, R: 0 }, // Vòng 20 đầu tiên
       persistentDuration: 10, // Vòng 20-29
-      persistentEffect: { C: 0, L: -3, R: 0 }, // Mỗi vòng L -2 (nhẹ hơn)
+      persistentEffect: { C: 0, L: -3, R: -2 }, // Mỗi vòng L -3, R -2
       defeatCondition: 'strike_resolved', // Track số vòng có L >= 25
       specialCondition: 'labor_collapse' // L < 15 → instant death
     }
@@ -64,11 +64,11 @@ export const BOSS_ROUNDS: BossRound[] = [
     title: 'BOSS VÒNG 30: CÁCH MẠNG VÔ SẢN',
     description: 'Đây là vòng cuối cùng! Mâu thuẫn đạt đỉnh điểm. Công nhân sẵn sàng lật đổ giai cấp tư sản. Số phận của bạn phụ thuộc vào quyết định cuối cùng!',
     historicalContext: 'Cách mạng tháng Mười Nga 1917: "Giới cướp có của được cắt đầu, người bị cướp được sống lại!" - V.I. Lenin. Giai cấp công nhân nắm chính quyền, kết thúc chế độ tư bản chủ nghĩa Nga.',
-    mechanicDescription: 'ĐIỀU KIỆN NGHIÊM NGẶT: (1) |C-L| > 40 → CÁCH MẠNG ngay! (2) Bất kỳ chỉ số < 20 → Hệ thống sụp đổ! Phải cân bằng TẤT CẢ metrics để vượt qua. Kết quả cuối cùng sẽ phản ánh chủ nghĩa kinh tế bạn đang theo đuổi!',
-    educationalInsight: '💡 Bài kiểm tra cuối cùng: Mỗi cách điều chỉnh C-L-R sẽ dẫn đến một hệ thống kinh tế khác nhau! C cao + L thấp = Tư bản bóc lột. C-L cân bằng + R cao = Nhà nước phúc lợi. L cao + C thấp = Xã hội chủ nghĩa. Quyết định của bạn trong 30 vòng sẽ định hình chủ nghĩa kinh tế cuối cùng - hãy xem kết quả!',
+    mechanicDescription: 'ĐIỀU KIỆN NGHIÊM NGẶT: (1) |C-L| > 40 → CÁCH MẠNG ngay! (2) Bất kỳ chỉ số < 20 → Hệ thống sụp đổ! Chọn 1 trong 3 policies điều chỉnh đơn giản (+15 một chỉ số duy nhất) để cân bằng cuối cùng.',
+    educationalInsight: '💡 Vòng cuối đơn giản hóa: Sau hành trình khó khăn qua 2 boss, bạn được chọn policies điều chỉnh đơn giản (C+15, L+15, hoặc R+15) để ổn định hệ thống. Tập trung vào chỉ số nào còn yếu nhất. Mục tiêu: Giữ cả 3 metrics > 20 và |C-L| ≤ 40 để vượt qua test cuối cùng!',
     rules: {
       policyCount: 3,
-      specialCondition: 'final_judgment', // Custom check
+      specialCondition: 'final_judgment' // Custom check: C, L, R ≥ 20 và |C-L| ≤ 40
     }
   }
 ];

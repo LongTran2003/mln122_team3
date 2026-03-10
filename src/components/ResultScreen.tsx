@@ -13,50 +13,50 @@ interface ResultScreenProps {
   onLeaderboardSaved: (entryId: string) => void;
 }
 
-export function ResultScreen({ 
-  result, 
+export function ResultScreen({
+  result,
   playerName, // ✅ Destructure playerName
-  onRestart, 
-  onBackToMenu, 
-  onViewLeaderboard, 
-  onLeaderboardSaved 
+  onRestart,
+  onBackToMenu,
+  onViewLeaderboard,
+  onLeaderboardSaved
 }: ResultScreenProps) {
-  
-const [saveStatus, setSaveStatus] =
-  useState<'saving' | SaveLeaderboardStatus | 'error'>('saving');
-const [saveMessage, setSaveMessage] = useState('');
-const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0); // 🆕 Track carousel
+
+  const [saveStatus, setSaveStatus] =
+    useState<'saving' | SaveLeaderboardStatus | 'error'>('saving');
+  const [saveMessage, setSaveMessage] = useState('');
+  const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0); // 🆕 Track carousel
 
   useEffect(() => {
-  let mounted = true;
+    let mounted = true;
 
-  const saveLead = async () => {
-    try {
-      const saved = await saveToLeaderboard(result, playerName);
-      if (!mounted) return;
+    const saveLead = async () => {
+      try {
+        const saved = await saveToLeaderboard(result, playerName);
+        if (!mounted) return;
 
-      onLeaderboardSaved(saved.entry.id || `${saved.entry.playerName}-${saved.entry.timestamp}`);
-      setSaveStatus(saved.status);
-      setSaveMessage(saved.message);
-    } catch (error) {
-      if (!mounted) return;
-      console.error('Failed to save:', error);
-      setSaveStatus('error');
-      setSaveMessage('Lỗi khi lưu kết quả. Vui lòng thử lại!');
-    }
-  };
+        onLeaderboardSaved(saved.entry.id || `${saved.entry.playerName}-${saved.entry.timestamp}`);
+        setSaveStatus(saved.status);
+        setSaveMessage(saved.message);
+      } catch (error) {
+        if (!mounted) return;
+        console.error('Failed to save:', error);
+        setSaveStatus('error');
+        setSaveMessage('Lỗi khi lưu kết quả. Vui lòng thử lại!');
+      }
+    };
 
-  void saveLead();
+    void saveLead();
 
-  return () => {
-    mounted = false;
-  };
-}, [result, playerName, onLeaderboardSaved]);
+    return () => {
+      mounted = false;
+    };
+  }, [result, playerName, onLeaderboardSaved]);
 
   // Calculate rank based on exploitation rate
   const getRank = (exploitationRate: number): string => {
     if (!result.survived) return 'F';
-    
+
     if (exploitationRate < 0.5) return 'S';
     if (exploitationRate < 1.0) return 'A';
     if (exploitationRate < 1.5) return 'B';
@@ -117,14 +117,14 @@ const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0); // 🆕 T
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
 
-{/* ✅ Thông báo save status */}
+        {/* ✅ Thông báo save status */}
         {saveStatus === 'saving' && (
           <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-4 mb-6 flex items-center gap-3">
             <div className="animate-spin text-2xl">⚙️</div>
             <span className="text-blue-700 font-semibold">Đang lưu kết quả...</span>
           </div>
         )}
-        
+
         {saveStatus === 'success' && (
           <div className="bg-green-50 border-2 border-green-300 rounded-xl p-4 mb-6 flex items-center gap-3">
             <span className="text-2xl">✅</span>
@@ -195,19 +195,19 @@ const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0); // 🆕 T
               {/* Ideology Header */}
               <div className="text-center mb-6">
                 <div className="text-7xl mb-3">{ideology.icon}</div>
-                <h3 className="text-white text-3xl font-black mb-2">{ideology.name}</h3>
-                <p className="text-white/90 text-lg leading-relaxed max-w-2xl mx-auto">
+                <h3 className="text-gray-900 text-3xl font-black mb-2">{ideology.name}</h3>
+                <p className="text-gray-800 text-lg leading-relaxed max-w-2xl mx-auto">
                   {ideology.description}
                 </p>
               </div>
 
-              {/* Milestones Carousel */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-4">
+              {/* 🆕 IMAGE CAROUSEL */}
+              <div className="bg-white rounded-xl p-4 mb-4 shadow-lg">
                 <div className="flex items-center justify-between gap-4">
                   {/* Previous Button */}
                   <button
                     onClick={prevMilestone}
-                    className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all"
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-full transition-all flex-shrink-0"
                     aria-label="Previous"
                   >
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -215,17 +215,28 @@ const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0); // 🆕 T
                     </svg>
                   </button>
 
-                  {/* Milestone Content */}
-                  <div className="flex-1 text-center min-h-[120px] flex items-center justify-center">
-                    <div className="text-white text-lg leading-relaxed px-4 animate-fade-in">
-                      {ideology.milestones[currentMilestoneIndex]}
-                    </div>
+                  {/* Image Display */}
+                  <div className="flex-1 overflow-hidden rounded-lg">
+                    <img
+                      src={`/img/ideologies/${ideology.id}_${currentMilestoneIndex + 1}.jpg`}
+                      alt={ideology.milestones[currentMilestoneIndex]}
+                      className="w-full h-64 object-cover animate-fade-in"
+                      onError={(e) => {
+                        // Fallback to icon emoji if image not found
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                        const fallback = document.createElement('div');
+                        fallback.className = 'w-full h-64 flex items-center justify-center bg-gray-100 rounded-lg';
+                        fallback.innerHTML = `<span class="text-9xl">${ideology.icon}</span>`;
+                        target.parentElement?.appendChild(fallback);
+                      }}
+                    />
                   </div>
 
                   {/* Next Button */}
                   <button
                     onClick={nextMilestone}
-                    className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all"
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-3 rounded-full transition-all flex-shrink-0"
                     aria-label="Next"
                   >
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -234,15 +245,25 @@ const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0); // 🆕 T
                   </button>
                 </div>
 
+                {/* Caption under image */}
+                <div className="mt-4 text-center">
+                  <p className="text-gray-900 text-base leading-relaxed px-4 font-semibold mb-2">
+                    {ideology.milestones[currentMilestoneIndex]}
+                  </p>
+                  <p className="text-gray-700 text-sm leading-relaxed px-4">
+                    {ideology.imageDescriptions[currentMilestoneIndex]}
+                  </p>
+                </div>
+
                 {/* Dots Indicator */}
                 <div className="flex justify-center gap-2 mt-4">
                   {ideology.milestones.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentMilestoneIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${index === currentMilestoneIndex
-                          ? 'bg-white w-8'
-                          : 'bg-white/40 hover:bg-white/60'
+                      className={`h-2 rounded-full transition-all ${index === currentMilestoneIndex
+                          ? 'bg-gray-800 w-8'
+                          : 'bg-gray-400 hover:bg-gray-600 w-2'
                         }`}
                       aria-label={`Go to slide ${index + 1}`}
                     />
@@ -251,9 +272,9 @@ const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0); // 🆕 T
               </div>
 
               {/* Historical Example */}
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
-                <div className="text-white/80 text-sm font-semibold mb-1">📜 Ví dụ lịch sử:</div>
-                <div className="text-white text-base">{ideology.historicalExample}</div>
+              <div className="bg-white/90 rounded-xl p-4 text-center">
+                <div className="text-gray-700 text-sm font-semibold mb-1">📜 Ví dụ lịch sử:</div>
+                <div className="text-gray-900 text-base font-medium">{ideology.historicalExample}</div>
               </div>
             </div>
           </div>
@@ -368,7 +389,7 @@ const [currentMilestoneIndex, setCurrentMilestoneIndex] = useState(0); // 🆕 T
         {/* ✅ Action Buttons - Không còn button "Lưu vào bảng xếp hạng" nữa */}
         <div className="space-y-4">
           {/* ✅ Thông báo đã lưu tự động */}
-          
+
 
           <button
             onClick={onViewLeaderboard}

@@ -102,6 +102,25 @@ export const ALL_SPECIAL_EVENTS: SpecialEvent[] = [
     icon: '🏦',
     effects: { C: 15, L: -10, R: -20 }
   }
+  // 🆕 Thêm 3 events mới giảm R
+  {
+    title: 'Khủng hoảng Nhà ở',
+    description: 'Giá nhà tăng vọt, công nhân không đủ tiền thuê. Nhiều người vô gia cư, mệt mỏi',
+    icon: '🏚️',
+    effects: { C: 5, L: -8, R: -18 }
+  },
+  {
+    title: 'Khủng hoảng Năng lượng',
+    description: 'Giá điện, xăng tăng gấp đôi. Công nhân không đủ tiền sưởi ấm, đi lại',
+    icon: '⚡',
+    effects: { C: -5, L: 0, R: -20 }
+  },
+  {
+    title: 'Khủng hoảng Giáo dục',
+    description: 'Học phí tăng cao, con cái công nhân bỏ học đi làm sớm. Thế hệ sau thiếu kỹ năng',
+    icon: '📚',
+    effects: { C: 8, L: -12, R: -16 }
+  }
 ];
 
 // Configuration for random event system

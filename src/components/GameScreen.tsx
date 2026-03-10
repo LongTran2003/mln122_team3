@@ -9,7 +9,8 @@ import { getRandomSpecialEvent, SpecialEvent } from '../data/special-events';
 import { GameResult } from '../App';
 import { isBossRound, getBossRound, BossRound } from '../data/boss-round';
 import { BossIntroModal } from './BossIntroModal';
-import { getMixedPolicies, getMixedCrisisPolicies } from '../data/policies';
+import { getMixedPolicies, getMixedCrisisPolicies, getFinalPolicies } from '../data/policies';
+
 
 interface GameScreenProps {
   playerName: string; // ✅ Thêm prop playerName
@@ -372,14 +373,24 @@ export function GameScreen({ playerName, onGameEnd }: GameScreenProps) { // ✅ 
 
     if (!currentBoss) return;
 
+    // 🆕 Boss 30: Use special final adjustment policies
+    if (currentBoss.round === 30) {
+      setCurrentPolicies(getFinalPolicies());
+      addLog(round, `🚩 ${currentBoss.name}: Chọn policies điều chỉnh cuối cùng!`, 'event');
+      return;
+    }
+
     // Generate policies based on Boss rules
     const policyCount = currentBoss.rules.policyCount || 3;
 
     if (currentBoss.rules.allowedCategories && currentBoss.rules.allowedCategories.length > 0) {
-      // Filter by allowed categories (Round 20)
+      // Filter by allowed categories (Boss 20)
       setCurrentPolicies(getMixedPolicies(currentBoss.rules.allowedCategories, policyCount));
+    } else if (currentBoss.rules.crisisMode) {
+      // Crisis policies (Boss 10)
+      setCurrentPolicies(getMixedCrisisPolicies(1, 1));
     } else {
-      // Normal random (Round 10, 30)
+      // Normal random
       setCurrentPolicies(getRandomPolicies(policyCount));
     }
 
@@ -408,7 +419,7 @@ export function GameScreen({ playerName, onGameEnd }: GameScreenProps) { // ✅ 
                 /* Nếu đang trong persistent effect */
                 bossState.active && (
                   <span>
-                    {getBossRound(bossState.bossRound!)?.name} tiếp diễn: 
+                    {getBossRound(bossState.bossRound!)?.name} tiếp diễn:
                     <span className="ml-2 bg-white/20 px-3 py-1 rounded-full text-sm">
                       {bossState.roundsRemaining + 1}/{getBossRound(bossState.bossRound!)?.rules.persistentDuration} vòng
                     </span>
