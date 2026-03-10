@@ -101,7 +101,7 @@ export const ALL_SPECIAL_EVENTS: SpecialEvent[] = [
     description: 'Chính sách tư nhân hóa, cắt giảm phúc lợi',
     icon: '🏦',
     effects: { C: 15, L: -10, R: -20 }
-  }
+  },
   // 🆕 Thêm 3 events mới giảm R
   {
     title: 'Khủng hoảng Nhà ở',
